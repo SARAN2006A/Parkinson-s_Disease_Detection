@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import tempfile
 import sys
-import pandas as pd
+
 import logging
 import textwrap
 
@@ -11,12 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from src.models.inference import VideoPredictor
 
-# Configure Logging
-import logging
-import src.app.utils as utils 
-import plotly.graph_objects as go
-
-# Configure Logging
+import src.app.utils as utils
 logging.basicConfig(level=logging.INFO)
 
 # Page Config
@@ -161,9 +156,7 @@ if uploaded_file is not None:
                         # Display Severity Level Label
                         st.markdown(f"<h3 style='text-align: center; color: {utils.get_severity_color(level)}'>{severity_label}</h3>", unsafe_allow_html=True)
                         
-                        with st.expander("Debug Details (Raw Features)"):
-                            st.write("Kinematic Features utilized for analysis:")
-                            st.json(features)
+
 
                     else:
                         st.error("Could not process video. Please ensure a person is visible.")
@@ -173,5 +166,6 @@ if uploaded_file is not None:
                     logging.error(e)
     
     # Cleanup temp file
-    # os.unlink(video_path) 
+    # Cleanup temp file
+    os.unlink(video_path) 
 
