@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroGait AI | Precision Motor Analysis</title>
+    <meta name="description" content="Advanced AI-driven assessment of motor symptoms using computer vision.">
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Animated background elements -->
+    <div class="ambient-background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="noise-overlay"></div>
+    </div>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <header class="hero-section">
+            <div class="brand-badge">
+                <span class="pulse-dot"></span>
+                <span>AI-Powered Diagnostics</span>
+            </div>
+            <h1 class="hero-title">NeuroGait <span class="gradient-text">AI</span></h1>
+            <p class="hero-subtitle">High-precision motor symptom assessment powered by advanced computer vision.<br>Upload clinical footage for instant, quantifiable UPDRS estimation.</p>
+        </header>
+
+        <main class="app-layout">
+            <!-- Left Column: Input / Upload -->
+            <section class="glass-panel upload-panel" id="uploadCard">
+                <div class="panel-header">
+                    <h2>Analysis Configuration</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskType">Select Motor Task</label>
+                    <div class="custom-select-wrapper">
+                        <select id="taskType" class="custom-select">
+                            <option value="Gait Analysis">Gait Analysis</option>
+                            <option value="Toe Tapping">Toe Tapping</option>
+                            <option value="Leg Agility">Leg Agility</option>
+                            <option value="Sit-to-Stand">Sit-to-Stand</option>
+                            <option value="Tremor Analysis">Tremor Analysis</option>
+                            <option value="Hand Movements">Hand Movements</option>
+                        </select>
+                        <div class="select-icon">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-zone" id="dropZone">
+                    <div class="upload-content">
+                        <div class="upload-icon-wrapper">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        </div>
+                        <h3>Upload Patient Video</h3>
+                        <p>Drag and drop or click to browse</p>
+                        <span class="file-hint">Supported formats: MP4, AVI, MOV</span>
+                    </div>
+                    <input type="file" id="videoInput" accept="video/mp4,video/x-m4v,video/avi,video/quicktime" hidden>
+                </div>
+
+                <div id="errorBanner" class="alert-banner error hidden">
+                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span id="errorMessage">An error occurred during analysis.</span>
+                </div>
+
+                <div class="guidelines">
+                    <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Capture Guidelines</h4>
+                    <ul>
+                        <li>Ensure stable camera positioning</li>
+                        <li>Maintain full subject visibility in frame</li>
+                        <li>Record minimum 10 seconds of movement</li>
+                    </ul>
+                </div>
+
+                <button id="analyzeBtn" class="action-btn primary-btn" disabled>
+                    <span class="btn-text">Initialize Analysis</span>
+                    <div class="btn-loader" id="analyzeSpinner"></div>
+                </button>
+            </section>
+
+            <!-- Right Column: Results -->
+            <section class="glass-panel results-panel hidden" id="resultCard">
+                <div class="panel-header">
+                    <h2>Clinical Assessment Results</h2>
+                    <button id="resetBtn" class="icon-btn" title="New Analysis">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    </button>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Status Overview</span>
+                        <div class="status-indicator" id="conditionBadge">Processing...</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">AI Confidence</span>
+                        <div class="confidence-value" id="confidenceScore">--%</div>
+                    </div>
+                </div>
+
+                <div class="score-showcase">
+                    <div class="chart-wrapper">
+                        <canvas id="gaugeChart"></canvas>
+                        <div class="score-overlay">
+                            <span class="score-main" id="predictedScore">--</span>
+                            <span class="score-max">/ 132</span>
+                        </div>
+                    </div>
+                    <div class="severity-badge" id="severityLabel">-- Severity</div>
+                </div>
+
+                <div class="insights-section">
+                    <h3>Key Observations</h3>
+                    <div class="insights-list" id="findingsList">
+                        <!-- Dynamic findings -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>v0.2.0 &bull; Precision diagnostics powered by MediaPipe & Neural Networks</p>
+        </footer>
+    </div>
+    
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

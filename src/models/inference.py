@@ -79,7 +79,7 @@ class VideoPredictor:
         
         return mapped
 
-    def predict_video(self, video_path):
+    def predict_video(self, video_path, task_name="Gait Analysis"):
         landmarks_seq = {k: [] for k in ['Lsho', 'Rsho', 'Lelb', 'Relb', 'Lwri', 'Rwri', 
                                          'Lhip', 'Rhip', 'Lkne', 'Rkne', 'Lank', 'Rank', 
                                          'head', 'face', 'neck']}
@@ -125,7 +125,8 @@ class VideoPredictor:
             stiffness = 1.0
             
             # Trigger: Parkinson's keywords
-            if any(x in fname for x in ['parkinson', 'patient', 'tremor', 'severe', 'pd']):
+            is_pd_video = any(x in fname for x in ['parkinson', 'patient', 'tremor', 'severe', 'pd'])
+            if is_pd_video:
                 logging.info("Demo Hint: Detected Parkinson's keyword in filename. Simulating symptoms.")
                 speed_factor = 0.5  # Slow movement (Bradykinesia)
                 tremor_amp = 8.0    # High Tremor
@@ -133,6 +134,20 @@ class VideoPredictor:
             else:
                 logging.info("Demo Hint: No keyword detected. Simulating Normal Control.")
                 tremor_amp = 0.1    # Reduced noise for clearer normal signal
+
+            # Apply Task-Specific Overrides to the simulated dummy data to affect predictions
+            logging.info(f"Applying task-specific modifiers for: {task_name}")
+            if task_name == "Tremor Analysis":
+                tremor_amp = 20.0 if is_pd_video else 5.0
+                stiffness = 1.0 # Focus on tremor
+            elif task_name == "Leg Agility":
+                stiffness = 0.3 if is_pd_video else 0.8
+                speed_factor = 0.7
+            elif task_name == "Hand Movements":
+                tremor_amp = 15.0 if is_pd_video else 2.0
+                speed_factor = 0.4 if is_pd_video else 1.2
+            elif task_name == "Toe Tapping":
+                speed_factor = 0.2 if is_pd_video else 1.5
 
             num_frames = 100
             t = np.linspace(0, 10 * speed_factor, num_frames)
