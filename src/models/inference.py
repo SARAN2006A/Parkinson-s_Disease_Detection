@@ -2,9 +2,13 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import pandas as pd
-import joblib
 import os
+os.environ["FOR_DISABLE_CONSOLE_CTRL_HANDLER"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 import logging
+import joblib
 from src.features.build_features import extract_kinematic_features
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -203,8 +207,11 @@ class VideoPredictor:
         # Impute
         X = self.imputer.transform(df_reindexed)
         
-        # Predict
-        prediction = self.model.predict(X)[0]
+        from threadpoolctl import threadpool_limits
+        
+        # Predict 
+        with threadpool_limits(limits=1, user_api='blas'), threadpool_limits(limits=1, user_api='openmp'):
+            prediction = self.model.predict(X)[0]
         
         return prediction, features
 
