@@ -39,8 +39,12 @@ def extract_kinematic_features(landmarks_seq, fps=30):
     # CPM Joint mapping (based on UDysRS dataset)
     # Ensure raw data matches this format: { 'joint_name': [[x,y], [x,y]...], ... }
     
+    if fps <= 0:
+        logging.error("Invalid FPS <= 0. Cannot extract features.")
+        return None
+
     num_frames = len(landmarks_seq['neck']) if 'neck' in landmarks_seq else 0
-    if num_frames < 10:
+    if num_frames < 30: # Need at least 1 second of data at 30fps
         return None
 
     # --- 1. Joint Angles ---

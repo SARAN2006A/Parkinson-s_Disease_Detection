@@ -16,6 +16,14 @@ import src.app.utils as utils
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)  # Enable CORS for all routes
 
+# Configuration for robustness
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
+MAX_FILE_SIZE_MB = 20  # Limit to 20MB
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE_MB * 1024 * 1024
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 logging.basicConfig(level=logging.INFO)
 
 @app.route('/', methods=['GET'])
@@ -46,6 +54,9 @@ def analyze_video():
     file = request.files['video']
     if file.filename == '':
         return jsonify({'error': 'No selected file.'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'error': f'Unsupported file type. Allowed types: {", ".join(ALLOWED_EXTENSIONS)}'}), 400
 
     task_name = request.form.get('task_name', 'Gait Analysis')
 
@@ -91,8 +102,18 @@ def analyze_video():
         return jsonify(result)
         
     except Exception as e:
-        logging.error(f"Analysis failed: {str(e)}", exc_info=True)
-        return jsonify({'error': f'Analysis failed: {str(e)}'}), 500
+        error_msg = str(e)
+        logging.error(f"Analysis failed: {error_msg}", exc_info=True)
+        
+        # User-friendly error messages
+        if "timeout" in error_msg.lower():
+            friendly_error = "The analysis timed out. Please try a shorter video (under 30 seconds)."
+        elif "empty" in error_msg.lower() or "no landmarks" in error_msg.lower():
+             friendly_error = "No human motion detected. Please ensure the person is clearly visible."
+        else:
+            friendly_error = f"Analysis failed: {error_msg}"
+            
+        return jsonify({'error': friendly_error}), 500
         
     finally:
         # Cleanup

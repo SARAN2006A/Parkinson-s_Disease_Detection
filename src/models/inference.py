@@ -13,6 +13,9 @@ from src.features.build_features import extract_kinematic_features
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+MAX_VIDEO_DURATION_SECONDS = 60 # Prevent timeouts on Render free tier
+MAX_FRAMES_TO_PROCESS = 1800    # ~60s @ 30fps
+
 class VideoPredictor:
     def __init__(self, model_dir):
         self.model_path = os.path.join(model_dir, 'rf_model_updrs.pkl')
@@ -99,6 +102,11 @@ class VideoPredictor:
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            
+            if fps > 0 and (total_frames / fps) > MAX_VIDEO_DURATION_SECONDS:
+                cap.release()
+                raise ValueError(f"Video is too long ({total_frames/fps:.1f}s). Please upload a video under {MAX_VIDEO_DURATION_SECONDS}s.")
             
             frame_idx = 0
             while cap.isOpened():
@@ -115,6 +123,9 @@ class VideoPredictor:
                         landmarks_seq[k].append(v)
                 
                 frame_idx += 1
+                if frame_idx >= MAX_FRAMES_TO_PROCESS:
+                    logging.warning(f"Reached max frame limit ({MAX_FRAMES_TO_PROCESS}). Truncating analysis.")
+                    break
             cap.release()
         else:
             # DEMO MODE: Generate dummy walking motion with SMART VARIATION
