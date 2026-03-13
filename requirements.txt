@@ -3,9 +3,9 @@ mediapipe>=0.10.9
 scikit-learn>=1.6.0
 pandas>=2.2.3
 numpy>=2.0.0
-matplotlib==3.8.2
-seaborn==0.13.2
-flask==3.0.2
-flask-cors==4.0.0
-werkzeug==3.0.1
-gunicorn==21.2.0
+matplotlib>=3.10.0
+seaborn>=0.13.2
+flask>=3.0.2
+flask-cors>=4.0.0
+werkzeug>=3.0.1
+gunicorn>=21.2.0
