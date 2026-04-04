@@ -1,4 +1,4 @@
-# NeuroGait AI: Video-based Parkinson's Disease Estimation
+# Parkinson Disease Estimation: Video-based Severity Assessment
 
 A production-ready artificial intelligence platform designed to estimate the severity of Parkinson’s Disease and Levodopa-induced Dyskinesia from single-person videos. This project leverages Pose Estimation (MediaPipe) and a Random Forest classification pipeline, completely eliminating the need for expensive wearable hardware sensors.
 
@@ -45,7 +45,7 @@ If you are a developer looking to run or improve the model locally:
 1. **Clone and Setup:**
    ```bash
    git clone <repository_url>
-   cd parkinson
+   cd parkinson_1
    pip install -r requirements.txt
    ```
 
@@ -75,19 +75,21 @@ This repository is configured for 1-click PaaS deployments (such as Render.com) 
 ## 📁 Repository Structure
 
 ```
-parkinson/
-├── data/               # Hidden directory containing secure patient raw data
-├── render.yaml         # Render blueprint configuration for CI/CD
-├── requirements.txt    # Python dependencies (Flask, Gunicorn, MediaPipe, scikit-learn)
+parkinson_1/
+├── data/               # Project data (processed/ and raw/)
+├── models/             # Trained ML models (.pkl files)
+├── render.yaml         # Render blueprint configuration
+├── requirements.txt    # Python dependencies
 ├── src/                # Project Source Code
 │   ├── api/            # Flask Web Server
-│   │   ├── static/     # Compressed CSS and JS for the frontend
-│   │   ├── templates/  # Core HTML views
+│   │   ├── static/     # CSS and JS for the frontend
+│   │   ├── templates/  # HTML views
 │   │   └── app.py      # Main backend routing application
-│   ├── data/           # ETL scripts for pre-processing the raw data
+│   ├── app/            # Shared utilities
+│   │   └── utils.py    # Common helper functions
+│   ├── data/           # ETL scripts for pre-processing
 │   ├── features/       # Feature extraction algorithms (Kinematics)
-│   ├── models/         # Inference definitions (`inference.py`)
-│   └── visualization/  # Plotting algorithms
+│   └── models/         # Inference and training definitions
 └── README.md           # Master documentation file
 ```
 
